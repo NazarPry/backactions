@@ -32,6 +32,9 @@ jobs:
       - name: Regular test and build
         run: ./mvnw clean package
 
+      - name: Get version from pom.xml
+        run: echo "VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
       - name: Login ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -39,8 +42,7 @@ jobs:
       - name: Build, tag and push RDS
         env: 
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: inter/backend
-          IMAGE_TAG: test
+          ECR_REPOSITORY: inter/backend          
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
